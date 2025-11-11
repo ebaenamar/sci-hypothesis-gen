@@ -166,27 +166,42 @@ export class HealthcareMCPClient {
   // Parsing methods
   private parsePubMedResults(data: any): PubMedResult[] {
     try {
-      const content = data.content?.[0]?.text || '';
-      // Parse the text response - adjust based on actual MCP response format
-      const results: PubMedResult[] = [];
-      
-      // Basic parsing - needs adjustment based on actual response
-      const lines = content.split('\n');
-      let currentResult: Partial<PubMedResult> = {};
-      
-      for (const line of lines) {
-        if (line.startsWith('Title:')) {
-          if (currentResult.title) results.push(currentResult as PubMedResult);
-          currentResult = { title: line.replace('Title:', '').trim() };
-        } else if (line.startsWith('PMID:')) {
-          currentResult.pmid = line.replace('PMID:', '').trim();
-        } else if (line.startsWith('Abstract:')) {
-          currentResult.abstract = line.replace('Abstract:', '').trim();
-        }
+      // Healthcare MCP returns data directly in JSON format
+      if (data.articles && Array.isArray(data.articles)) {
+        return data.articles.map((article: any) => ({
+          title: article.title || '',
+          pmid: article.id || '',
+          abstract: article.abstract || '',
+          authors: article.authors || [],
+          year: article.publication_date ? parseInt(article.publication_date) : 0,
+          journal: article.journal || '',
+          doi: article.doi || '',
+        }));
       }
       
-      if (currentResult.title) results.push(currentResult as PubMedResult);
-      return results;
+      // Fallback: try to parse from content field
+      const content = data.content?.[0]?.text || '';
+      if (content) {
+        const results: PubMedResult[] = [];
+        const lines = content.split('\n');
+        let currentResult: Partial<PubMedResult> = {};
+        
+        for (const line of lines) {
+          if (line.startsWith('Title:')) {
+            if (currentResult.title) results.push(currentResult as PubMedResult);
+            currentResult = { title: line.replace('Title:', '').trim() };
+          } else if (line.startsWith('PMID:')) {
+            currentResult.pmid = line.replace('PMID:', '').trim();
+          } else if (line.startsWith('Abstract:')) {
+            currentResult.abstract = line.replace('Abstract:', '').trim();
+          }
+        }
+        
+        if (currentResult.title) results.push(currentResult as PubMedResult);
+        return results;
+      }
+      
+      return [];
     } catch (error) {
       console.warn('Error parsing PubMed results:', error);
       return [];
