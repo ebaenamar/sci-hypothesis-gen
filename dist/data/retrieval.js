@@ -1,14 +1,20 @@
 import axios from 'axios';
 import PQueue from 'p-queue';
+import { HealthcareMCPClient } from './healthcare-mcp-client.js';
 /**
  * External data retrieval service for scientific papers
+ * Now with Healthcare MCP integration for improved reliability
  */
 export class DataRetrieval {
     clients;
     queues;
+    mcpClient;
+    mcpAvailable = false;
     constructor(dataSources) {
         this.clients = new Map();
         this.queues = new Map();
+        // Try to initialize Healthcare MCP client
+        this.initHealthcareMCP();
         for (const source of dataSources) {
             // Create axios client
             const client = axios.create({
@@ -26,6 +32,41 @@ export class DataRetrieval {
             });
             this.queues.set(source.name, queue);
         }
+    }
+    /**
+     * Initialize Healthcare MCP client
+     */
+    async initHealthcareMCP() {
+        try {
+            // Try to connect to local MCP server
+            this.mcpClient = new HealthcareMCPClient('http://localhost:3000');
+            this.mcpAvailable = await this.mcpClient.healthCheck();
+            if (this.mcpAvailable) {
+                console.log('✅ Healthcare MCP Server connected - using enhanced retrieval');
+            }
+            else {
+                console.log('⚠️  Healthcare MCP Server not available - using fallback APIs');
+            }
+        }
+        catch (error) {
+            console.log('⚠️  Healthcare MCP initialization failed - using fallback APIs');
+            this.mcpAvailable = false;
+        }
+    }
+    /**
+     * Convert Healthcare MCP PubMed results to Paper format
+     */
+    convertMCPToPaper(mcpResult) {
+        return {
+            id: mcpResult.pmid,
+            title: mcpResult.title,
+            abstract: mcpResult.abstract,
+            authors: mcpResult.authors || [],
+            year: mcpResult.year || 0,
+            pmid: mcpResult.pmid,
+            journal: mcpResult.journal,
+            doi: mcpResult.doi,
+        };
     }
     /**
      * Search Semantic Scholar for papers
@@ -61,8 +102,23 @@ export class DataRetrieval {
     }
     /**
      * Search PubMed for papers
+     * Now uses Healthcare MCP if available for better reliability
      */
     async searchPubMed(query, limit = 10) {
+        // Try Healthcare MCP first if available
+        if (this.mcpAvailable && this.mcpClient) {
+            try {
+                const mcpResults = await this.mcpClient.searchPubMed(query, limit, '10');
+                if (mcpResults.length > 0) {
+                    return mcpResults.map(r => this.convertMCPToPaper(r));
+                }
+            }
+            catch (error) {
+                console.warn('Healthcare MCP PubMed search failed, falling back to direct API');
+                this.mcpAvailable = false; // Mark as unavailable for this session
+            }
+        }
+        // Fallback to direct PubMed API
         const client = this.clients.get('pubmed');
         const queue = this.queues.get('pubmed');
         if (!client || !queue)
@@ -148,25 +204,65 @@ export class DataRetrieval {
     }
     /**
      * Search across all sources
+     * Uses Healthcare MCP comprehensive search when available
      */
     async searchAll(query, limit = 20) {
+        // Try Healthcare MCP comprehensive search first
+        if (this.mcpAvailable && this.mcpClient) {
+            try {
+                console.log('🔍 Using Healthcare MCP for comprehensive search...');
+                const mcpResults = await this.mcpClient.searchAll(query, limit);
+                if (mcpResults.totalResults > 0) {
+                    const papers = [
+                        ...mcpResults.pubmed.map(r => this.convertMCPToPaper(r)),
+                        ...mcpResults.medrxiv.map(r => ({
+                            id: r.doi || r.title,
+                            title: r.title,
+                            abstract: r.abstract,
+                            authors: r.authors || [],
+                            year: r.date ? parseInt(r.date.split('-')[0]) : 0,
+                            doi: r.doi,
+                        })),
+                        ...mcpResults.ncbi.map(r => ({
+                            id: r.url || r.title,
+                            title: r.title,
+                            abstract: r.content,
+                            authors: [],
+                            year: 0,
+                        })),
+                    ];
+                    console.log(`✅ Found ${papers.length} papers via Healthcare MCP`);
+                    return this.deduplicatePapers(papers).slice(0, limit);
+                }
+            }
+            catch (error) {
+                console.warn('Healthcare MCP comprehensive search failed, using fallback');
+            }
+        }
+        // Fallback to original multi-API approach
+        console.log('⚠️  Using fallback APIs for paper search...');
         const results = await Promise.all([
             this.searchSemanticScholar(query, Math.ceil(limit / 2)),
             this.searchPubMed(query, Math.ceil(limit / 4)),
             this.searchArXiv(query, Math.ceil(limit / 4)),
         ]);
         const allPapers = results.flat();
-        // Deduplicate by title similarity
+        return this.deduplicatePapers(allPapers).slice(0, limit);
+    }
+    /**
+     * Deduplicate papers by title similarity
+     */
+    deduplicatePapers(papers) {
         const uniquePapers = [];
         const seenTitles = new Set();
-        for (const paper of allPapers) {
+        for (const paper of papers) {
             const normalizedTitle = paper.title.toLowerCase().replace(/\W+/g, '');
-            if (!seenTitles.has(normalizedTitle)) {
+            if (!seenTitles.has(normalizedTitle) && normalizedTitle.length > 0) {
                 seenTitles.add(normalizedTitle);
                 uniquePapers.push(paper);
             }
         }
-        return uniquePapers.slice(0, limit);
+        return uniquePapers;
     }
     /**
      * Check novelty of hypothesis against existing literature
