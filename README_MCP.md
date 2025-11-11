@@ -39,21 +39,38 @@ npm run generate single -- \
   --output ./output
 ```
 
-## 📊 Logs del Sistema
+## 📊 Comportamiento del Sistema
 
-### ✅ Con Healthcare MCP (Optimal):
-```
-✅ Healthcare MCP Server connected - using enhanced retrieval
-🔍 Using Healthcare MCP for comprehensive search...
-✅ Found 15 papers via Healthcare MCP
-✔ Hypothesis generated successfully!
+### Por defecto (Silencioso):
+
+El sistema **detecta automáticamente** si Healthcare MCP está disponible:
+- ✅ MCP disponible → Lo usa automáticamente (sin mensajes)
+- ⚠️ MCP no disponible → Usa fallback APIs (sin mensajes)
+
+**No verás mensajes de MCP** a menos que los habilites explícitamente.
+
+### Con logs de debug (Opcional):
+
+Para ver el estado de MCP en los logs:
+
+```bash
+# Habilitar logs de MCP
+export SHOW_MCP_STATUS=true
+
+# O en .env
+SHOW_MCP_STATUS=true
+
+# Generar hipótesis
+npm run generate single -- \
+  --dataset ./data/sample_papers.csv \
+  --keywords machine learning drug \
+  --output ./output
 ```
 
-### ⚠️ Sin Healthcare MCP (Fallback):
+Entonces verás:
 ```
-⚠️ Healthcare MCP Server not available - using fallback APIs
-⚠️ Using fallback APIs for paper search...
-Semantic Scholar search error: 429 Too Many Requests
+✅ Healthcare MCP: Enhanced retrieval enabled
+✅ Healthcare MCP: Found 15 papers
 ✔ Hypothesis generated successfully!
 ```
 

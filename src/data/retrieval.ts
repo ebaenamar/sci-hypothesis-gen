@@ -43,21 +43,30 @@ export class DataRetrieval {
   }
 
   /**
-   * Initialize Healthcare MCP client
+   * Initialize Healthcare MCP client (lazy initialization)
    */
   private async initHealthcareMCP(): Promise<void> {
+    // Only log if environment variable is set to show MCP status
+    const showMCPStatus = process.env.SHOW_MCP_STATUS === 'true';
+    
     try {
-      // Try to connect to local MCP server
-      this.mcpClient = new HealthcareMCPClient('http://localhost:3000');
-      this.mcpAvailable = await this.mcpClient.healthCheck();
+      // Try to connect to MCP server (configurable via env)
+      const mcpUrl = process.env.HEALTHCARE_MCP_URL || 'http://localhost:3000';
+      this.mcpClient = new HealthcareMCPClient(mcpUrl);
       
-      if (this.mcpAvailable) {
-        console.log('✅ Healthcare MCP Server connected - using enhanced retrieval');
-      } else {
-        console.log('⚠️  Healthcare MCP Server not available - using fallback APIs');
+      // Quick health check with short timeout
+      const healthCheckPromise = this.mcpClient.healthCheck();
+      const timeoutPromise = new Promise<boolean>((resolve) => 
+        setTimeout(() => resolve(false), 1000) // 1 second timeout
+      );
+      
+      this.mcpAvailable = await Promise.race([healthCheckPromise, timeoutPromise]);
+      
+      if (this.mcpAvailable && showMCPStatus) {
+        console.log('✅ Healthcare MCP: Enhanced retrieval enabled');
       }
     } catch (error) {
-      console.log('⚠️  Healthcare MCP initialization failed - using fallback APIs');
+      // Silently fall back - no need to warn user
       this.mcpAvailable = false;
     }
   }
@@ -127,8 +136,8 @@ export class DataRetrieval {
           return mcpResults.map(r => this.convertMCPToPaper(r));
         }
       } catch (error) {
-        console.warn('Healthcare MCP PubMed search failed, falling back to direct API');
-        this.mcpAvailable = false; // Mark as unavailable for this session
+        // Silently fall back, disable MCP for this session
+        this.mcpAvailable = false;
       }
     }
 
@@ -234,10 +243,11 @@ export class DataRetrieval {
    * Uses Healthcare MCP comprehensive search when available
    */
   async searchAll(query: string, limit: number = 20): Promise<Paper[]> {
+    const showMCPStatus = process.env.SHOW_MCP_STATUS === 'true';
+    
     // Try Healthcare MCP comprehensive search first
     if (this.mcpAvailable && this.mcpClient) {
       try {
-        console.log('🔍 Using Healthcare MCP for comprehensive search...');
         const mcpResults = await this.mcpClient.searchAll(query, limit);
         
         if (mcpResults.totalResults > 0) {
@@ -260,16 +270,18 @@ export class DataRetrieval {
             })),
           ];
           
-          console.log(`✅ Found ${papers.length} papers via Healthcare MCP`);
+          if (showMCPStatus) {
+            console.log(`✅ Healthcare MCP: Found ${papers.length} papers`);
+          }
           return this.deduplicatePapers(papers).slice(0, limit);
         }
       } catch (error) {
-        console.warn('Healthcare MCP comprehensive search failed, using fallback');
+        // Silently fall back
+        this.mcpAvailable = false;
       }
     }
 
-    // Fallback to original multi-API approach
-    console.log('⚠️  Using fallback APIs for paper search...');
+    // Fallback to original multi-API approach (silent)
     const results = await Promise.all([
       this.searchSemanticScholar(query, Math.ceil(limit / 2)),
       this.searchPubMed(query, Math.ceil(limit / 4)),

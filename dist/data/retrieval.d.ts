@@ -10,7 +10,7 @@ export declare class DataRetrieval {
     private mcpAvailable;
     constructor(dataSources: DataSource[]);
     /**
-     * Initialize Healthcare MCP client
+     * Initialize Healthcare MCP client (lazy initialization)
      */
     private initHealthcareMCP;
     /**

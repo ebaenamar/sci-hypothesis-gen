@@ -13,20 +13,23 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Enable MCP status logging for this test
+export SHOW_MCP_STATUS=true
+
 # Check if Healthcare MCP server is running
 echo -e "${YELLOW}Checking Healthcare MCP Server...${NC}"
 if curl -s http://localhost:3000/health > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Healthcare MCP Server is running!${NC}"
+    echo "   System will use enhanced retrieval automatically"
     echo ""
 else
-    echo -e "${RED}❌ Healthcare MCP Server not detected${NC}"
+    echo -e "${YELLOW}ℹ️  Healthcare MCP Server not detected at localhost:3000${NC}"
+    echo "   System will use standard API retrieval (this is normal)"
     echo ""
-    echo "To start Healthcare MCP Server:"
-    echo "  1. Clone: git clone https://github.com/Cicatriiz/healthcare-mcp-public.git"
-    echo "  2. Install: cd healthcare-mcp-public && npm install"
-    echo "  3. Start: npm run dev"
-    echo ""
-    echo "Continuing with fallback APIs..."
+    echo "   To enable enhanced retrieval (optional):"
+    echo "   1. Clone: git clone https://github.com/Cicatriiz/healthcare-mcp-public.git"
+    echo "   2. Install: cd healthcare-mcp-public && npm install"
+    echo "   3. Start: npm run dev"
     echo ""
 fi
 
