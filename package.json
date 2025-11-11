@@ -1,0 +1,60 @@
+{
+  "name": "sci-hypothesis-agent",
+  "version": "1.0.0",
+  "description": "Agentic system for automated scientific hypothesis generation and meta-research",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/index.js",
+    "generate": "tsx src/cli/generate.ts",
+    "explore": "tsx src/cli/explore.ts",
+    "server": "tsx src/server/index.ts"
+  },
+  "keywords": [
+    "scientific-discovery",
+    "hypothesis-generation",
+    "multi-agent",
+    "knowledge-graph",
+    "ai-research"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "axios": "^1.6.7",
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "csv-parse": "^5.5.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.18.3",
+    "graphology": "^0.25.4",
+    "graphology-communities-louvain": "^2.0.1",
+    "graphology-generators": "^0.11.2",
+    "graphology-layout": "^0.6.1",
+    "graphology-metrics": "^2.1.0",
+    "graphology-shortest-path": "^2.0.2",
+    "neo4j-driver": "^5.17.0",
+    "openai": "^4.28.4",
+    "ora": "^8.0.1",
+    "p-queue": "^8.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.20",
+    "@typescript-eslint/eslint-plugin": "^7.0.2",
+    "@typescript-eslint/parser": "^7.0.2",
+    "eslint": "^8.57.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "id": "96a0aa4e-8bc3-496a-9cca-10d632ceae37",
+  "title": "Untitled Hypothesis",
+  "summary": "",
+  "motivation": "",
+  "mechanism": "",
+  "designPrinciples": [],
+  "experimentalPriorities": [],
+  "graphPath": {
+    "nodes": [
+      {
+        "id": "pediatric_extracorporeal",
+        "label": "pediatric extracorporeal",
+        "type": "concept",
+        "properties": {},
+        "papers": [
+          38959362
+        ],
+        "frequency": 2
+      },
+      {
+        "id": "extracorporeal_membrane_oxygenation",
+        "label": "extracorporeal membrane oxygenation",
+        "type": "concept",
+        "properties": {},
+        "papers": [
+          38959362,
+          38959358
+        ],
+        "frequency": 3
+      },
+      {
+        "id": "membrane_oxygenation_anticoagulation",
+        "label": "membrane oxygenation anticoagulation",
+        "type": "concept",
+        "properties": {},
+        "papers": [
+          38959362
+        ],
+        "frequency": 2
+      },
+      {
+        "id": "oxygenation_anticoagulation",
+        "label": "oxygenation anticoagulation",
+        "type": "concept",
+        "properties": {},
+        "papers": [
+          38959362
+        ],
+        "frequency": 2
+      }
+    ],
+    "edges": [
+      {
+        "source": "pediatric_extracorporeal",
+        "target": "extracorporeal_membrane_oxygenation",
+        "type": "relates_to",
+        "weight": 0.5,
+        "confidence": 0.3333333333333333,
+        "evidence": [
+          38959362
+        ]
+      },
+      {
+        "source": "extracorporeal_membrane_oxygenation",
+        "target": "membrane_oxygenation_anticoagulation",
+        "type": "relates_to",
+        "weight": 0.5,
+        "confidence": 0.3333333333333333,
+        "evidence": [
+          38959362
+        ]
+      },
+      {
+        "source": "membrane_oxygenation_anticoagulation",
+        "target": "oxygenation_anticoagulation",
+        "type": "relates_to",
+        "weight": 0.5,
+        "confidence": 0.5,
+        "evidence": [
+          38959362
+        ]
+      }
+    ],
+    "length": 4,
+    "totalWeight": 1.5,
+    "novelty": 0.3833333333333333
+  },
+  "noveltyScore": 1,
+  "feasibilityScore": 0,
+  "impactScore": 0,
+  "relatedPapers": [],
+  "generatedAt": "2025-11-11T22:10:01.067Z",
+  "status": "reviewed",
+  "critiques": []
+}

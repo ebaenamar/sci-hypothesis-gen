@@ -1,0 +1,8 @@
+# This directory stores dataset files
+# Place your CSV datasets here
+
+# Example structure:
+# data/
+#   papers.csv          - Your main dataset
+#   pubmed_data.csv     - AI Scientist dataset
+#   custom_corpus.csv   - Custom dataset

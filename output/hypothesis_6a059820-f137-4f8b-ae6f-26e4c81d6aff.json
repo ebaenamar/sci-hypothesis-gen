@@ -1,0 +1,95 @@
+{
+  "id": "6a059820-f137-4f8b-ae6f-26e4c81d6aff",
+  "title": "Untitled Hypothesis",
+  "summary": "",
+  "motivation": "",
+  "mechanism": "",
+  "designPrinciples": [],
+  "experimentalPriorities": [],
+  "graphPath": {
+    "nodes": [
+      {
+        "id": "neural_networks",
+        "label": "neural networks",
+        "type": "concept",
+        "properties": {},
+        "papers": [
+          12345678
+        ],
+        "frequency": 2
+      },
+      {
+        "id": "protein_structure",
+        "label": "protein structure",
+        "type": "material",
+        "properties": {},
+        "papers": [
+          12345678
+        ],
+        "frequency": 2
+      },
+      {
+        "id": "structure_prediction",
+        "label": "structure prediction",
+        "type": "concept",
+        "properties": {},
+        "papers": [
+          12345678
+        ],
+        "frequency": 3
+      },
+      {
+        "id": "deep_learning",
+        "label": "deep learning",
+        "type": "concept",
+        "properties": {},
+        "papers": [
+          12345678
+        ],
+        "frequency": 2
+      }
+    ],
+    "edges": [
+      {
+        "source": "neural_networks",
+        "target": "protein_structure",
+        "type": "relates_to",
+        "weight": 0.5,
+        "confidence": 0.5,
+        "evidence": [
+          12345678
+        ]
+      },
+      {
+        "source": "protein_structure",
+        "target": "structure_prediction",
+        "type": "relates_to",
+        "weight": 0.5,
+        "confidence": 0.3333333333333333,
+        "evidence": [
+          12345678
+        ]
+      },
+      {
+        "source": "structure_prediction",
+        "target": "deep_learning",
+        "type": "relates_to",
+        "weight": 0.5,
+        "confidence": 0.3333333333333333,
+        "evidence": [
+          12345678
+        ]
+      }
+    ],
+    "length": 4,
+    "totalWeight": 1.5,
+    "novelty": 0.3833333333333333
+  },
+  "noveltyScore": 1,
+  "feasibilityScore": 0,
+  "impactScore": 0,
+  "relatedPapers": [],
+  "generatedAt": "2025-11-11T22:02:42.662Z",
+  "status": "reviewed",
+  "critiques": []
+}
